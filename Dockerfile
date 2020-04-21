@@ -1,10 +1,7 @@
-FROM ubuntu:bionic
+FROM ubuntu:xenial
 
 ENV container docker
 ENV DEBIAN_FRONTEND noninteractive
-
-# Unminimize (add documentation, tools, ...)
-RUN yes | unminimize
 
 # Install locale
 ENV LANG C.UTF-8
@@ -24,9 +21,9 @@ RUN apt-get update && apt-get install -y \
     dpkg-divert --local --rename --add /sbin/udevadm &&\
     ln -s /bin/true /sbin/udevadm
 
-# Install GNOME
+# Install Unity
 RUN apt-get update \
-  && apt-get install -y gnome-shell \
+  && apt-get install -y unity \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
