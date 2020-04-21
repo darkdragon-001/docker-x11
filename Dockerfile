@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:bionic
 
 ENV container docker
 ENV DEBIAN_FRONTEND noninteractive
