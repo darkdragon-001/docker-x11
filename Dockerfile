@@ -30,17 +30,22 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Create unprivileged user
-# NOTE user hardcoded in tigervnc.service
-# NOTE alternative is to use libnss_switch and create user at runtime -> use entrypoint script
-ARG UID=1000
-ARG USER=default
-RUN useradd ${USER} -u ${UID} -U -d /home/${USER} -m -s /bin/bash
-RUN apt-get update && apt-get install -y sudo && apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    echo "${USER} ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/${USER}" && \
-    chmod 440 "/etc/sudoers.d/${USER}"
-USER "${USER}"
-ENV USER="${USER}" \
-    HOME="/home/${USER}"
-WORKDIR "/home/${USER}"
+# Create unprivileged user (user and group names are "default")
+ENV HOME=/home/default
+WORKDIR $HOME
+# Install sudo
+RUN apt-get update && apt-get install -y sudo && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Setup sudo
+#   Allow group "default" to use sudo without password
+#   Alternative use keyword "ALL" to match all users/groups
+RUN echo "%default ALL=(ALL) NOPASSWD: ALL" >> "/etc/sudoers"
+# Use libnss_switch to "create" user
+#   Install NSS
+RUN apt-get update && apt-get install -y libnss-wrapper && apt-get clean && rm -rf /var/lib/apt/lists/*
+#   Copy script to generate user and switch to it
+COPY generate_container_user /
+# Setup entrypoint
+COPY entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]
 
