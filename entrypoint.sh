@@ -2,7 +2,7 @@
 # every exit != 0 fails the script
 set -e
 
-# generate container user via NSS
+# generate container user
 source /generate_container_user
 
 # correct forwarding of shutdown signal
