@@ -27,22 +27,18 @@ RUN apt-get update && apt-get install -y \
       gnome-shell && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create unprivileged user (user and group names are "default")
-ENV HOME=/home/default
-WORKDIR $HOME
 # Install sudo
 RUN apt-get update && apt-get install -y \
       sudo && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-# Setup sudo
-#   Allow group "default" to use sudo without password
-#   Alternative use keyword "ALL" to match all users/groups
-RUN echo "%default ALL=(ALL) NOPASSWD: ALL" >> "/etc/sudoers"
-# Use libnss_switch to "create" user
-#   Install NSS
-RUN apt-get update && apt-get install -y libnss-wrapper && apt-get clean && rm -rf /var/lib/apt/lists/*
-#   Copy script to generate user and switch to it
+#   Syntax: User Host = (Runas) Command (https://toroid.org/sudoers-syntax)
+#     User: ALL, user, %group, #uid, %#gid
+RUN echo "default ALL=(ALL) NOPASSWD: ALL" >> "/etc/sudoers"
+
+# Allow system user creation by everyone
+RUN chmod 666 /etc/passwd /etc/group /etc/shadow
 COPY generate_container_user /
+
 # Setup entrypoint
 COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]

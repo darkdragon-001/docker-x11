@@ -13,5 +13,6 @@ cleanup () {
 trap cleanup SIGINT SIGTERM
 
 # execute user command
+cd "${HOME}"
 exec "$@"
 
